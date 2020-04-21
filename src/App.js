@@ -1,26 +1,67 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class ChildWithError extends Component {
+  state = {
+    hasError: false,
+    error: ''
+  }
+
+  handleError = e => {
+    e.preventDefault()
+    this.setState({
+      hasError: true,
+      error: 'Throw error from ChildWithError'
+    })
+  }
+
+
+  render() {
+    const { hasError, error } = this.state
+
+    if (hasError) throw new Error(error)
+
+    return (
+      <button onClick={this.handleError}>Throw error</button>
+    )
+  }
+}
+
+class App extends Component {
+  state = {
+    hasError: false,
+    error: ''
+  }
+
+  componentDidCatch(error, info) {
+    if (error) {
+      console.log(info.componentStack)
+      this.setState({
+        hasError: true,
+        error: error.message
+      })
+    }
+  }
+
+  handleError = e => {
+    e.preventDefault()
+    this.setState({
+      hasError: false,
+      error: ''
+    })
+  }
+
+  render() {
+    const { hasError, error } = this.state
+    return (
+      <div className="App">
+        { hasError
+          ? (<button onClick={this.handleError}>{`${error} <- click to back`}</button>)
+          : (<ChildWithError />)
+        }
+      </div>
+    );
+  }
 }
 
 export default App;
